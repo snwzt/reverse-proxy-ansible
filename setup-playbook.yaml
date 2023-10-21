@@ -1,0 +1,61 @@
+- name: Install and Start Docker
+  hosts: all
+  become: true
+  vars:
+    default_container_name: "ipinfo-web-application"
+    default_container_image: "peterdavehello/ipinfo.tw"
+
+  tasks:
+    - name: Install Docker
+      package:
+        name: docker
+        state: present
+
+    - name: Start Docker
+      service:
+        name: docker
+        state: started
+
+    - name: Pull Image
+      community.docker.docker_image:
+        name: "{{ default_container_image }}"
+        source: pull
+
+    - name: Start Container
+      community.docker.docker_container:
+        name: "{{ default_container_name }}"
+        image: "{{ default_container_image }}"
+        state: started
+        detach: yes
+        ports:
+          - "8081:8080"      
+
+- name: Install and Start Nginx
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Install Nginx
+      package:
+        name: nginx
+        state: present
+
+    - name: Start Nginx
+      service:
+        name: nginx
+        state: started
+
+- name: Configure Nginx
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Copy config file
+      copy: 
+        src: ./default.conf
+        dest: /etc/nginx/conf.d/default.conf
+    
+    - name: Restart Nginx
+      service:
+        name: nginx
+        state: restarted

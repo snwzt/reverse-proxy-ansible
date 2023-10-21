@@ -1,0 +1,46 @@
+- name: Stop and Remove Nginx
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Stop Nginx
+      service:
+        name: nginx
+        state: stopped
+
+    - name: Remove Nginx
+      package:
+        name: nginx
+        state: absent
+
+- name: Stop and Remove running Container
+  hosts: all
+  become: true
+  vars:
+    default_container_name: "ipinfo-web-application"
+
+  tasks:
+    - name: Stop Container
+      community.docker.docker_container:
+        name: "{{ default_container_name }}"
+        state: stopped
+
+    - name: Remove Container
+      community.docker.docker_container:
+        name: "{{ default_container_name }}"
+        state: absent
+        
+- name: Stop and Remove Docker
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Stop Docker
+      service:
+        name: docker
+        state: stopped
+
+    - name: Remove Docker
+      package:
+        name: docker
+        state: absent
